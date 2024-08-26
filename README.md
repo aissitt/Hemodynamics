@@ -130,9 +130,9 @@ The `config.json` file contains all the configurations for training and evaluati
 }
 ```
 
-### Loss Functions
+## Loss Functions
 
-#### Data-Driven Loss (Huber Loss)
+### Data-Driven Loss (Huber Loss)
 
 The Huber loss for each velocity component (u, v, w) is calculated as:
 
@@ -145,17 +145,17 @@ where the Huber loss is defined as:
 $$
 \text{Huber}(x, y) = 
 \begin{cases} 
-0.5 (x - y)^2 & \text{if } |x - y| < \delta \\
-\delta (|x - y| - 0.5 \delta) & \text{otherwise} 
+0.5 \cdot (x - y)^2 & \text{if } |x - y| < \delta \\
+\delta \cdot (|x - y| - 0.5 \cdot \delta) & \text{otherwise}
 \end{cases}
 $$
 
-#### Physics-Informed Loss
+### Physics-Informed Loss
 
 The physics-informed loss combines several components:
 
 $$
-L_{\text{Physics}} = \lambda_{\text{data}} L_{\text{data}} + \lambda_{\text{continuity}} L_{\text{continuity}} + \lambda_{\text{vorticity}} L_{\text{vorticity}} + \lambda_{\text{momentum}} L_{\text{momentum}}
+L_{\text{Physics}} = \lambda_{\text{data}}L_{\text{data}} + \lambda_{\text{continuity}}L_{\text{continuity}} + \lambda_{\text{vorticity}}L_{\text{vorticity}} + \lambda_{\text{momentum}}L_{\text{momentum}}
 $$
 
 where:
