@@ -23,15 +23,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--model-path', required=True, help='Path to the trained model file')
 parser.add_argument('--mode', required=True, choices=['data', 'physics'], help='Type of the model')
 parser.add_argument('--output-dir', required=True, help='Directory to save evaluation results')
+parser.add_argument('--data-path', required=True, help='Path to the data directory')
 parser.add_argument('--test-indices', required=True, nargs=2, type=int, help='Start and end indices for the test data')
 args = parser.parse_args()
 
-lvad_data_path = '/path/to/your/LVAD_data'
-high_error_threshold = 0.01  # Define a threshold for high error
-
 # Load dataset
-testX_np = load_dataset(os.path.join(lvad_data_path, 'lvad_rdfs_inlets.npy'))[args.test_indices[0]:args.test_indices[1]]
-testY_np = load_dataset(os.path.join(lvad_data_path, 'lvad_vels.npy'))[args.test_indices[0]:args.test_indices[1]]
+testX_np = load_dataset(os.path.join(args.data_path, 'lvad_rdfs_inlets.npy'))[args.test_indices[0]:args.test_indices[1]]
+testY_np = load_dataset(os.path.join(args.data_path, 'lvad_vels.npy'))[args.test_indices[0]:args.test_indices[1]]
 
 # Extract RDF component to create a mask
 rdf = testX_np[..., 0]
@@ -45,7 +43,7 @@ predictions = best_model.predict(testX_np)
 
 # Compute errors and metrics
 abs_errors, peak_error, peak_error_coords = compute_errors(testY_np, predictions, mask)
-high_error_count, high_error_percentage = compute_high_error_metrics(abs_errors, high_error_threshold)
+high_error_count, high_error_percentage = compute_high_error_metrics(abs_errors, high_error_threshold=0.01)
 
 # Log results
 metrics = {
@@ -56,6 +54,7 @@ metrics = {
 }
 
 metrics_file = os.path.join(args.output_dir, "logs", "metrics.json")
+os.makedirs(os.path.dirname(metrics_file), exist_ok=True)
 with open(metrics_file, 'w') as f:
     json.dump(metrics, f, indent=4)
 
