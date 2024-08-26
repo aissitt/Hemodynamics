@@ -1,0 +1,30 @@
+{
+    "use_env_vars": true, 
+    "training": {
+      "epochs": 10000,
+      "batch_size": 4,
+      "learning_rate": 0.001,
+      "train_indices": [0, 36],
+      "val_indices": [36, 40],
+      "test_indices": [40, 50],
+      "input_data": "$INPUT_DATA_PATH",  
+      "output_data": "$OUTPUT_DATA_PATH" 
+    },
+    "loss_parameters": {
+      "data_driven": {
+        "huber_delta": 0.1
+      },
+      "physics_informed": {
+        "lambda_data": 1.0,
+        "lambda_continuity": 0.001,
+        "lambda_vorticity_focused": 0.1,
+        "threshold_vorticity": 0.0437,
+        "lambda_momentum": 0.001,
+        "nu": 3.5e-6
+      }
+    },
+    "model": {
+      "input_shape": [128, 128, 128, 2]
+    }
+  }
+  
