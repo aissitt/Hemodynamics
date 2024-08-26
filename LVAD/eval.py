@@ -32,11 +32,18 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--model-path', required=True, help='Path to the trained model file')
 parser.add_argument('--mode', required=True, choices=['data', 'physics'], help='Type of the model')
 parser.add_argument('--output-dir', required=True, help='Directory to save evaluation results')
+parser.add_argument('--test-indices', nargs=2, type=int, help='Start and end indices for the test data')
 args = parser.parse_args()
 
-# Load dataset using test indices from config
-testX_np = load_dataset(config["training"]["input_data"])[config["training"]["test_indices"][0]:config["training"]["test_indices"][1]]
-testY_np = load_dataset(config["training"]["output_data"])[config["training"]["test_indices"][0]:config["training"]["test_indices"][1]]
+# Determine test indices to use
+if args.test_indices:
+    test_indices = args.test_indices
+else:
+    test_indices = config["training"]["test_indices"]
+
+# Load dataset using test indices from config or arguments
+testX_np = load_dataset(config["training"]["input_data"])[test_indices[0]:test_indices[1]]
+testY_np = load_dataset(config["training"]["output_data"])[test_indices[0]:test_indices[1]]
 
 # Extract RDF component to create a mask
 rdf = testX_np[..., 0]
@@ -50,7 +57,8 @@ predictions = best_model.predict(testX_np)
 
 # Compute errors and metrics
 abs_errors, peak_error, peak_error_coords = compute_errors(testY_np, predictions, mask)
-high_error_count, high_error_percentage = compute_high_error_metrics(abs_errors, config["loss_parameters"]["high_error_threshold"])
+high_error_threshold = config["loss_parameters"].get("high_error_threshold", 0.01)  # Default to 0.01 if not specified
+high_error_count, high_error_percentage = compute_high_error_metrics(abs_errors, high_error_threshold)
 
 # Log results
 metrics = {
@@ -60,7 +68,11 @@ metrics = {
     "Percentage of high error points": float(high_error_percentage)
 }
 
-metrics_file = os.path.join(args.output_dir, "logs", "metrics.json")
+# Ensure logs directory exists
+logs_dir = os.path.join(args.output_dir, "logs")
+os.makedirs(logs_dir, exist_ok=True)
+
+metrics_file = os.path.join(logs_dir, "metrics.json")
 with open(metrics_file, 'w') as f:
     json.dump(metrics, f, indent=4)
 
