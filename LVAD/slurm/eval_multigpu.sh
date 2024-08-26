@@ -27,7 +27,7 @@
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Create directories for this run
-OUTPUT_BASE_DIR=/your/path/to/Hemodynamics/LVAD/outputs
+OUTPUT_BASE_DIR=/path/to/your/Hemodynamics/LVAD/outputs
 RUN_DIR=${OUTPUT_BASE_DIR}/eval_run_${TIMESTAMP}
 
 # Direct output and error files to the run-specific directory
@@ -40,12 +40,13 @@ echo "Starting evaluation job on $(hostname) at $(date)"
 . ./env.sh blood
 
 # Move to the LVAD directory containing the scripts
-cd /your/path/to/Hemodynamics/LVAD
+cd /home1/aissitt2019/Hemodynamics/LVAD
 
 # Parse the evaluation type argument
 EVAL_TYPE=$1
 
-# Define test indices
+# Define data path and test indices
+DATA_PATH=/home1/aissitt2019/LVAD/LVAD_data
 TEST_INDICES_START=40
 TEST_INDICES_END=50
 
@@ -63,8 +64,8 @@ LATEST_MODEL=$(ls -t $MODEL_PATH | head -n 1)
 
 start=$(date +%s)
 
-# Evaluate the model using all available GPUs and specified indices
-python eval.py --model-path $LATEST_MODEL --mode ${EVAL_TYPE} --output-dir ${RUN_DIR} --test-indices ${TEST_INDICES_START} ${TEST_INDICES_END}
+# Evaluate the model using all available GPUs, specified indices, and data path
+python eval.py --model-path $LATEST_MODEL --mode ${EVAL_TYPE} --output-dir ${RUN_DIR} --data-path ${DATA_PATH} --test-indices ${TEST_INDICES_START} ${TEST_INDICES_END}
 
 end=$(date +%s)
 
