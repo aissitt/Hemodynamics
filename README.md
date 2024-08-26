@@ -59,7 +59,7 @@ Hemodynamics/
 2. **Set Up the Conda Environment**:
    ```bash
    conda env create -f environment.yml
-   conda activate Hemodynamics
+   conda activate hemodynamics
    ```
 
 3. **Configure Environment Variables** (if using `use_env_vars` in `config.json`):
