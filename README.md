@@ -143,10 +143,9 @@ L_{\text{Huber}} = \frac{1}{3} \left( \text{Huber}(u, \hat{u}) + \text{Huber}(v,
 where the Huber loss is defined as:
 
 \[
-\text{Huber}(x, y) = 
-\begin{cases} 
+\text{Huber}(x, y) = \begin{cases} 
 0.5 \cdot (x - y)^2 & \text{if } |x - y| < \delta \\
-\delta \cdot (|x - y| - 0.5 \cdot \delta) & \text{otherwise}
+\delta \cdot (|x - y| - 0.5 \cdot \delta) & \text{otherwise} 
 \end{cases}
 \]
 
@@ -160,7 +159,7 @@ L_{\text{Physics}} = \lambda_{\text{data}}L_{\text{data}} + \lambda_{\text{conti
 
 where:
 
-- `L_{data}`: Huber loss on velocity components
-- `L_{continuity}`: Continuity loss to enforce incompressibility
-- `L_{vorticity}`: Vorticity-focused loss to emphasize high-vorticity regions
-- `L_{momentum}`: Partial momentum loss capturing convective and diffusive terms of the Navier-Stokes equations (note: only specific components are used, not the full Navier-Stokes momentum equation).
+- \(L_{\text{data}}\): Huber loss on velocity components
+- \(L_{\text{continuity}}\): Continuity loss to enforce incompressibility
+- \(L_{\text{vorticity}}\): Vorticity-focused loss to emphasize high-vorticity regions
+- \(L_{\text{momentum}}\): Partial momentum loss capturing convective and diffusive terms of the Navier-Stokes equations (note: only specific components are used, not the full Navier-Stokes momentum equation).
