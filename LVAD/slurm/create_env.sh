@@ -34,7 +34,7 @@ echo "Starting environment setup job on $(hostname) at $(date)"
 ##################################
 
 # Get the path to the cloned GitHub repository
-REPO_PATH="${REPO_PATH:-/home1/aissitt2019/Hemodynamics/LVAD}"
+REPO_PATH="${REPO_PATH:-/path/to/your/Hemodynamics/LVAD}"
 ENV_YML_PATH="$REPO_PATH/environment.yml"
 
 # Attempt to find Conda automatically if not provided via environment variable
