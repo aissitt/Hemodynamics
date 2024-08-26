@@ -53,7 +53,7 @@ Hemodynamics/
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/yourusername/Hemodynamics.git
+   git clone https://github.com/aissitt/Hemodynamics.git
    cd Hemodynamics/LVAD
 
 2. **Set Up the Conda Environment**:
