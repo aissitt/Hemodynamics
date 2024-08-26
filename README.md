@@ -160,7 +160,9 @@ $$
 
 where:
 
-- **\(L_{\text{data}}\):** Huber loss on velocity components  
-- **\(L_{\text{continuity}}\):** Continuity loss to enforce incompressibility  
-- **\(L_{\text{vorticity}}\):** Vorticity-focused loss to emphasize high-vorticity regions  
-- **\(L_{\text{momentum}}\):** Partial momentum loss capturing convective and diffusive terms of the Navier-Stokes equations (note: only specific components are used, not the full Navier-Stokes momentum equation).  
+<ul>
+  <li><b>\(L_{\text{data}}\)</b>: Huber loss on velocity components</li>
+  <li><b>\(L_{\text{continuity}}\)</b>: Continuity loss to enforce incompressibility</li>
+  <li><b>\(L_{\text{vorticity}}\)</b>: Vorticity-focused loss to emphasize high-vorticity regions</li>
+  <li><b>\(L_{\text{momentum}}\)</b>: Partial momentum loss capturing convective and diffusive terms of the Navier-Stokes equations (note: only specific components are used, not the full Navier-Stokes momentum equation).</li>
+</ul>
