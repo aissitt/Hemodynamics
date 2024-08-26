@@ -18,24 +18,25 @@ custom_objects = {
     "physics_informed_loss": physics_informed_loss
 }
 
+# Load configuration
+with open('config.json', 'r') as f:
+    config = json.load(f)
+
+# If using environment variables, replace placeholders with their values
+if config.get("use_env_vars", False):
+    config["training"]["input_data"] = os.getenv("INPUT_DATA_PATH")
+    config["training"]["output_data"] = os.getenv("OUTPUT_DATA_PATH")
+
 # Argument parser for command-line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--model-path', required=True, help='Path to the trained model file')
 parser.add_argument('--mode', required=True, choices=['data', 'physics'], help='Type of the model')
 parser.add_argument('--output-dir', required=True, help='Directory to save evaluation results')
-parser.add_argument('--config-file', required=True, help='Path to the configuration file')
 args = parser.parse_args()
 
-# Load configuration file
-with open(args.config_file) as f:
-    config = json.load(f)
-
-# Extract test indices from the config
-test_indices = tuple(config['training']['test_indices'])
-
-# Load dataset
-testX_np = load_dataset(config['training']['input_data'])[test_indices[0]:test_indices[1]]
-testY_np = load_dataset(config['training']['output_data'])[test_indices[0]:test_indices[1]]
+# Load dataset using test indices from config
+testX_np = load_dataset(config["training"]["input_data"])[config["training"]["test_indices"][0]:config["training"]["test_indices"][1]]
+testY_np = load_dataset(config["training"]["output_data"])[config["training"]["test_indices"][0]:config["training"]["test_indices"][1]]
 
 # Extract RDF component to create a mask
 rdf = testX_np[..., 0]
@@ -49,7 +50,7 @@ predictions = best_model.predict(testX_np)
 
 # Compute errors and metrics
 abs_errors, peak_error, peak_error_coords = compute_errors(testY_np, predictions, mask)
-high_error_count, high_error_percentage = compute_high_error_metrics(abs_errors, config['training']['high_error_threshold'])
+high_error_count, high_error_percentage = compute_high_error_metrics(abs_errors, config["loss_parameters"]["high_error_threshold"])
 
 # Log results
 metrics = {
