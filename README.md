@@ -55,6 +55,7 @@ Hemodynamics/
    ```bash
    git clone https://github.com/aissitt/Hemodynamics.git
    cd Hemodynamics/LVAD
+   cd slurm
 
 2. **Set Up the Conda Environment**:
    ```bash
