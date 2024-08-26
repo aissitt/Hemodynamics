@@ -75,7 +75,7 @@ Hemodynamics/
 To train a model, use the `train_multigpu.sh` script with SLURM:
 
 ```bash
-sbatch slurm/train_multigpu.sh data_driven  # For data-driven model
+sbatch slurm/train_multigpu.sh data  # For data-driven model
 sbatch slurm/train_multigpu.sh physics      # For physics-informed model
 ```
 
@@ -86,7 +86,7 @@ Training parameters like epochs, batch size, learning rate, and data paths are c
 To evaluate a model, use the `eval_multigpu.sh` script with SLURM:
 
 ```bash
-sbatch slurm/eval_multigpu.sh data_driven  # For data-driven model
+sbatch slurm/eval_multigpu.sh data  # For data-driven model
 sbatch slurm/eval_multigpu.sh physics      # For physics-informed model
 ```
 
