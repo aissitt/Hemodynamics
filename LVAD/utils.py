@@ -58,10 +58,10 @@ def create_output_directories(base_dir, run_name):
     print(f"Created output directories: {output_dir}, {logs_dir}, {images_dir}")
     return output_dir, logs_dir, images_dir
 
-def load_and_split_data(data_path, train_indices, val_indices):
+def load_and_split_data(input_data_path, output_data_path, train_indices, val_indices):
     # Load and split data into training and validation sets based on provided indices.
-    lvad_inlets_np = load_dataset(os.path.join(data_path, 'lvad_rdfs_inlets.npy'))
-    lvad_vels_np = load_dataset(os.path.join(data_path, 'lvad_vels.npy'))
+    lvad_inlets_np = load_dataset(input_data_path)
+    lvad_vels_np = load_dataset(output_data_path)
 
     trainX_np = lvad_inlets_np[train_indices[0]:train_indices[1]]
     trainY_np = lvad_vels_np[train_indices[0]:train_indices[1]]

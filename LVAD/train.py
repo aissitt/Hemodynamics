@@ -35,8 +35,8 @@ args = parser.parse_args()
 trainX_np, trainY_np, valX_np, valY_np = load_and_split_data(
     config["training"]["input_data"],
     config["training"]["output_data"],
-    train_indices=config["training"]["train_indices"],
-    val_indices=config["training"]["val_indices"]
+    config["training"]["train_indices"],
+    config["training"]["val_indices"]
 )
 
 # Create directories for this run
@@ -49,8 +49,11 @@ with strategy.scope():
     input_shape = tuple(config["model"]["input_shape"])
     model = unet_model(input_shape)
 
-    # Select loss function based on mode
-    loss = data_driven_loss if args.mode == 'data' else physics_informed_loss
+    # Select loss function based on mode and pass config if needed
+    if args.mode == 'data':
+        loss = lambda y_true, y_pred: data_driven_loss(y_true, y_pred, config)
+    else:
+        loss = lambda y_true, y_pred: physics_informed_loss(y_true, y_pred, config)
 
     # Compile the model
     model.compile(
