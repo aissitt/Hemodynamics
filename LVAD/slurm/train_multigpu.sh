@@ -36,8 +36,8 @@ RUN_DIR=${OUTPUT_BASE_DIR}/train_run_${TIMESTAMP}
 
 echo "Starting training job on $(hostname) at $(date)"
 
-# Load conda environment 'your_env'
-. ./env.sh your_env
+# Load conda environment 'hemodynamics'
+. ./env.sh hemodynamics
 
 # Move to the LVAD directory containing the scripts
 cd /your/path/to/Hemodynamics/LVAD
