@@ -5,6 +5,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from datetime import datetime
 import argparse
+import json
 from model import unet_model
 from loss import data_driven_loss, physics_informed_loss
 from metrics import RMSEPerComponent, NRMSEPerComponent, MAEPerComponent, NMAEPerComponent
@@ -19,13 +20,23 @@ for gpu in gpus:
 parser = argparse.ArgumentParser()
 parser.add_argument('--output-dir', required=True, help='Directory to save training results')
 parser.add_argument('--mode', choices=['data', 'physics'], required=True, help='Training mode: data-driven or physics-informed')
-parser.add_argument('--data-path', required=True, help='Path to the data directory')
-parser.add_argument('--train-indices', required=True, nargs=2, type=int, help='Start and end indices for the training data')
-parser.add_argument('--val-indices', required=True, nargs=2, type=int, help='Start and end indices for the validation data')
+parser.add_argument('--config-file', required=True, help='Path to the configuration file')
 args = parser.parse_args()
 
-# Load and split data using indices provided by the user
-trainX_np, trainY_np, valX_np, valY_np = load_and_split_data(args.data_path, train_indices=tuple(args.train_indices), val_indices=tuple(args.val_indices))
+# Load configuration file
+with open(args.config_file) as f:
+    config = json.load(f)
+
+# Extract training and loss parameters from the config
+train_config = config['training']
+loss_params = config['loss_parameters']['data_driven'] if args.mode == 'data' else config['loss_parameters']['physics_informed']
+
+# Load and split data using indices from the configuration
+lvad_data_path = train_config['input_data']
+output_data_path = train_config['output_data']
+trainX_np, trainY_np, valX_np, valY_np = load_and_split_data(lvad_data_path, output_data_path, 
+                                                             train_indices=tuple(train_config['train_indices']), 
+                                                             val_indices=tuple(train_config['val_indices']))
 
 # Create directories for this run
 output_dir, logs_dir, images_dir = create_output_directories(args.output_dir, "train_run_" + datetime.now().strftime("%Y%m%d_%H%M%S"))
@@ -34,7 +45,7 @@ output_dir, logs_dir, images_dir = create_output_directories(args.output_dir, "t
 strategy = tf.distribute.MirroredStrategy()
 
 with strategy.scope():
-    input_shape = (128, 128, 128, 2)
+    input_shape = tuple(config['model']['input_shape'])
     model = unet_model(input_shape)
 
     # Select loss function based on mode
@@ -43,7 +54,7 @@ with strategy.scope():
     # Compile the model
     model.compile(
         loss=loss,
-        optimizer=Adam(learning_rate=0.001),
+        optimizer=Adam(learning_rate=train_config['learning_rate']),
         metrics=[RMSEPerComponent(), NRMSEPerComponent(), MAEPerComponent(), NMAEPerComponent()]
     )
 
@@ -56,8 +67,8 @@ with strategy.scope():
     history = model.fit(
         trainX_np, trainY_np,
         validation_data=(valX_np, valY_np),
-        epochs=10000,
-        batch_size=1 * strategy.num_replicas_in_sync,
+        epochs=train_config['epochs'],
+        batch_size=train_config['batch_size'] * strategy.num_replicas_in_sync,
         callbacks=[early_stopping, checkpoint]
     )
 
@@ -66,9 +77,9 @@ plot_training_history(history, images_dir)
 
 # Save hyperparameters
 hyperparameters = {
-    'learning_rate': 0.001,
-    'batch_size': 1 * strategy.num_replicas_in_sync,
-    'epochs': 10000,
+    'learning_rate': train_config['learning_rate'],
+    'batch_size': train_config['batch_size'],
+    'epochs': train_config['epochs'],
     'loss': args.mode
 }
 save_hyperparameters(hyperparameters, output_dir)
