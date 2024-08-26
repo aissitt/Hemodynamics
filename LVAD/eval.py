@@ -1,51 +1,67 @@
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 import tensorflow as tf
-from tensorflow.keras.models import load_model
 import argparse
-from model import unet_model
-from metrics import RMSEPerComponent, NRMSEPerComponent, MAEPerComponent, NMAEPerComponent
-from utils import load_dataset, plot_training_history, create_output_directories
+import json
+from model import RMSEPerComponent, NRMSEPerComponent, MAEPerComponent, NMAEPerComponent
+from loss import data_driven_loss, physics_informed_loss
+from utils import load_dataset, apply_mask, compute_errors, compute_high_error_metrics, plot_error_maps
+
+# Define custom objects for loading the model
+custom_objects = {
+    "RMSEPerComponent": RMSEPerComponent,
+    "NRMSEPerComponent": NRMSEPerComponent,
+    "MAEPerComponent": MAEPerComponent,
+    "NMAEPerComponent": NMAEPerComponent,
+    "data_driven_loss": data_driven_loss,
+    "physics_informed_loss": physics_informed_loss
+}
 
 # Argument parser for command-line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('--train-dir', required=True, help='Directory of the corresponding training run')
-parser.add_argument('--mode', choices=['data', 'physics'], required=True, help='Evaluation mode: data-driven or physics-informed')
+parser.add_argument('--model-path', required=True, help='Path to the trained model file')
+parser.add_argument('--mode', required=True, choices=['data', 'physics'], help='Type of the model')
+parser.add_argument('--output-dir', required=True, help='Directory to save evaluation results')
+parser.add_argument('--test-indices', required=True, nargs=2, type=int, help='Start and end indices for the test data')
 args = parser.parse_args()
 
-# Define base directories
 lvad_data_path = '/home1/aissitt2019/LVAD/LVAD_data'
+high_error_threshold = 0.01  # Define a threshold for high error
 
-# Load the data
-valX_np = load_dataset(os.path.join(lvad_data_path, 'lvad_rdfs_inlets.npy'))[36:40]
-valY_np = load_dataset(os.path.join(lvad_data_path, 'lvad_vels.npy'))[36:40]
+# Load dataset
+testX_np = load_dataset(os.path.join(lvad_data_path, 'lvad_rdfs_inlets.npy'))[args.test_indices[0]:args.test_indices[1]]
+testY_np = load_dataset(os.path.join(lvad_data_path, 'lvad_vels.npy'))[args.test_indices[0]:args.test_indices[1]]
 
-# Get the latest model from the training directory
-model_files = [f for f in os.listdir(args.train_dir) if f.endswith('.h5')]
-latest_model_file = max(model_files, key=lambda x: os.path.getmtime(os.path.join(args.train_dir, x)))
-latest_model_path = os.path.join(args.train_dir, latest_model_file)
+# Extract RDF component to create a mask
+rdf = testX_np[..., 0]
+mask = rdf > 0
 
-# Load the model
-model = load_model(latest_model_path, custom_objects={
-    'RMSEPerComponent': RMSEPerComponent,
-    'NRMSEPerComponent': NRMSEPerComponent,
-    'MAEPerComponent': MAEPerComponent,
-    'NMAEPerComponent': NMAEPerComponent
-})
+# Load the best model
+best_model = tf.keras.models.load_model(args.model_path, custom_objects=custom_objects)
 
-# Create directories for evaluation results within the training directory
-eval_dir = os.path.join(args.train_dir, 'evaluation')
-logs_dir = os.path.join(eval_dir, "logs")
-images_dir = os.path.join(eval_dir, "images")
-os.makedirs(logs_dir, exist_ok=True)
+# Make predictions on the sample batch
+predictions = best_model.predict(testX_np)
+
+# Compute errors and metrics
+abs_errors, peak_error, peak_error_coords = compute_errors(testY_np, predictions, mask)
+high_error_count, high_error_percentage = compute_high_error_metrics(abs_errors, high_error_threshold)
+
+# Log results
+metrics = {
+    "Peak Error": float(peak_error),
+    "Coordinates of Peak Error": [int(coord) for coord in peak_error_coords],
+    "Number of high error points": int(high_error_count),
+    "Percentage of high error points": float(high_error_percentage)
+}
+
+metrics_file = os.path.join(args.output_dir, "logs", "metrics.json")
+with open(metrics_file, 'w') as f:
+    json.dump(metrics, f, indent=4)
+
+# Plot and save error maps
+images_dir = os.path.join(args.output_dir, "images")
 os.makedirs(images_dir, exist_ok=True)
+plot_error_maps(testY_np, predictions, abs_errors, peak_error_coords, images_dir, mask)
 
-# Evaluate the model
-results = model.evaluate(valX_np, valY_np)
-print(f"Evaluation results: {results}")
-
-# If there are additional plots or logs, save them in the evaluation directory
-# Example: plot_training_history(history, images_dir)
-# Note: Replace 'history' with appropriate variable if plotting training history
-
-print(f"Evaluation completed. Results saved in {eval_dir}")
+print(f"Evaluation completed. Results saved to {args.output_dir}")
