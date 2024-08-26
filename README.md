@@ -1,7 +1,6 @@
-
 # Hemodynamics
 
-This repository contains code for training and evaluating deep learning models for hemodynamic simulations, specifically focusing on Left Ventricular Assist Device (LVAD) and aneurysm data. The repository supports both data-driven and physics-informed models using a 3D U-Net architecture.
+This repository contains code for training and evaluating deep learning models for hemodynamic simulations, specifically focusing on Left Ventricular Assist Device (LVAD) data. The repository supports both data-driven and physics-informed models using a 3D U-Net architecture.
 
 ## Project Structure
 
@@ -38,7 +37,8 @@ Hemodynamics/
 │   │       └── ...                   
 │   ├── ...                           
 │
-└── README.md                         # README file with project details and usage instructions
+├── README.md                         # README file with project details and usage instructions
+└── requirements.txt                  # List of required Python packages (if using pip)
 ```
 
 ## Setup Instructions
@@ -136,26 +136,27 @@ The `config.json` file contains all the configurations for training and evaluati
 
 The Huber loss for each velocity component (u, v, w) is calculated as:
 
-\[
+$$
 L_{\text{Huber}} = \frac{1}{3} \left( \text{Huber}(u, \hat{u}) + \text{Huber}(v, \hat{v}) + \text{Huber}(w, \hat{w}) \right)
-\]
+$$
 
 where the Huber loss is defined as:
 
-\[
-\text{Huber}(x, y) = \begin{cases} 
+$$
+\text{Huber}(x, y) = 
+\begin{cases} 
 0.5 (x - y)^2 & \text{if } |x - y| < \delta \\
 \delta (|x - y| - 0.5 \delta) & \text{otherwise} 
 \end{cases}
-\]
+$$
 
 #### Physics-Informed Loss
 
 The physics-informed loss combines several components:
 
-\[
+$$
 L_{\text{Physics}} = \lambda_{\text{data}} L_{\text{data}} + \lambda_{\text{continuity}} L_{\text{continuity}} + \lambda_{\text{vorticity}} L_{\text{vorticity}} + \lambda_{\text{momentum}} L_{\text{momentum}}
-\]
+$$
 
 where:
 
