@@ -160,7 +160,7 @@ L_{\text{Physics}} = \lambda_{\text{data}}L_{\text{data}} + \lambda_{\text{conti
 
 where:
 
-- \(L_{\text{data}}\): Huber loss on velocity components
-- \(L_{\text{continuity}}\): Continuity loss to enforce incompressibility
-- \(L_{\text{vorticity}}\): Vorticity-focused loss to emphasize high-vorticity regions
-- \(L_{\text{momentum}}\): Partial momentum loss capturing convective and diffusive terms of the Navier-Stokes equations (note: only specific components are used, not the full Navier-Stokes momentum equation).
+- `L_{data}`: Huber loss on velocity components
+- `L_{continuity}`: Continuity loss to enforce incompressibility
+- `L_{vorticity}`: Vorticity-focused loss to emphasize high-vorticity regions
+- `L_{momentum}`: Partial momentum loss capturing convective and diffusive terms of the Navier-Stokes equations (note: only specific components are used, not the full Navier-Stokes momentum equation).
