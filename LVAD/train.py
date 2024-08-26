@@ -19,11 +19,13 @@ for gpu in gpus:
 parser = argparse.ArgumentParser()
 parser.add_argument('--output-dir', required=True, help='Directory to save training results')
 parser.add_argument('--mode', choices=['data', 'physics'], required=True, help='Training mode: data-driven or physics-informed')
+parser.add_argument('--train-indices', required=True, nargs=2, type=int, help='Start and end indices for the training data')
+parser.add_argument('--val-indices', required=True, nargs=2, type=int, help='Start and end indices for the validation data')
 args = parser.parse_args()
 
-# Load and split data
+# Load and split data using indices provided by the user
 lvad_data_path = '/home1/aissitt2019/LVAD/LVAD_data'
-trainX_np, trainY_np, valX_np, valY_np = load_and_split_data(lvad_data_path, train_indices=(0, 36), val_indices=(36, 40))
+trainX_np, trainY_np, valX_np, valY_np = load_and_split_data(lvad_data_path, train_indices=tuple(args.train_indices), val_indices=tuple(args.val_indices))
 
 # Create directories for this run
 output_dir, logs_dir, images_dir = create_output_directories(args.output_dir, "train_run_" + datetime.now().strftime("%Y%m%d_%H%M%S"))
