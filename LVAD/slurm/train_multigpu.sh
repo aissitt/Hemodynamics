@@ -42,15 +42,12 @@ echo "Starting training job on $(hostname) at $(date)"
 # Move to the LVAD directory containing the scripts
 cd /path/to/your/Hemodynamics/LVAD
 
+# Set environment variables for data paths
+export INPUT_DATA_PATH="/path/to/your/LVAD/LVAD_data/inputs.npy" # Expects shape (x, 128, 128, 128, 2) where x is the number of samples, 128x128x128 represents the geometry, and 2 represents rdf and inlet values
+export OUTPUT_DATA_PATH="/path/to/your/LVAD/LVAD_data/outputs.npy" # Expects shape (x, 128, 128, 128, 3) where x is the number of samples, 128x128x128 represents the geometry, and 3 represents velocity components
+
 # Parse the training type argument
 TRAIN_TYPE=$1
-
-# Define data path and training/validation indices
-DATA_PATH=/path/to/your/LVAD_data
-TRAIN_INDICES_START=0
-TRAIN_INDICES_END=36
-VAL_INDICES_START=36
-VAL_INDICES_END=40
 
 if [[ "$TRAIN_TYPE" == "data_driven" ]]; then
     TRAIN_SCRIPT="train.py"
@@ -63,8 +60,8 @@ fi
 
 start=$(date +%s)
 
-# Train the model using all available GPUs, specified indices, and data path
-python $TRAIN_SCRIPT --output-dir ${RUN_DIR} --mode ${TRAIN_TYPE} --data-path ${DATA_PATH} --train-indices ${TRAIN_INDICES_START} ${TRAIN_INDICES_END} --val-indices ${VAL_INDICES_START} ${VAL_INDICES_END}
+# Train the model using all available GPUs
+python $TRAIN_SCRIPT --output-dir ${RUN_DIR} --mode ${TRAIN_TYPE}
 
 end=$(date +%s)
 
