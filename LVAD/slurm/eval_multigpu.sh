@@ -56,12 +56,12 @@ MODEL_PATH_ARG=$2
 
 # Check if a specific model path is provided; if not, default to the most recent model
 if [[ -z "$MODEL_PATH_ARG" ]]; then
-    if [[ "$EVAL_TYPE" == "data_driven" ]]; then
+    if [[ "$EVAL_TYPE" == "data" ]]; then
         MODEL_PATH="${TRAIN_RUN_DIR}/lvad_model_*.h5"
     elif [[ "$EVAL_TYPE" == "physics" ]]; then
         MODEL_PATH="${TRAIN_RUN_DIR}/lvad_model_*.h5"
     else
-        echo "Invalid evaluation type specified. Use 'data_driven' or 'physics'."
+        echo "Invalid evaluation type specified. Use 'data' or 'physics'."
         exit 1
     fi
 
