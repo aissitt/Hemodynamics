@@ -24,7 +24,7 @@ parser.add_argument('--val-indices', required=True, nargs=2, type=int, help='Sta
 args = parser.parse_args()
 
 # Load and split data using indices provided by the user
-lvad_data_path = '/home1/aissitt2019/LVAD/LVAD_data'
+lvad_data_path = '/path/to/your/LVAD_data'
 trainX_np, trainY_np, valX_np, valY_np = load_and_split_data(lvad_data_path, train_indices=tuple(args.train_indices), val_indices=tuple(args.val_indices))
 
 # Create directories for this run
