@@ -27,7 +27,7 @@
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Create directories for this run
-OUTPUT_BASE_DIR=/your/path/to/Hemodynamics/LVAD/outputs
+OUTPUT_BASE_DIR=/path/to/your/Hemodynamics/LVAD/outputs
 RUN_DIR=${OUTPUT_BASE_DIR}/train_run_${TIMESTAMP}
 
 # Direct output and error files to the run-specific directory
@@ -36,16 +36,17 @@ RUN_DIR=${OUTPUT_BASE_DIR}/train_run_${TIMESTAMP}
 
 echo "Starting training job on $(hostname) at $(date)"
 
-# Load conda environment 'hemodynamics'
+# Load conda environment named 'hemodynamics'
 . ./env.sh hemodynamics
 
 # Move to the LVAD directory containing the scripts
-cd /your/path/to/Hemodynamics/LVAD
+cd /path/to/your/Hemodynamics/LVAD
 
 # Parse the training type argument
 TRAIN_TYPE=$1
 
-# Define training and validation indices
+# Define data path and training/validation indices
+DATA_PATH=/path/to/your/LVAD_data
 TRAIN_INDICES_START=0
 TRAIN_INDICES_END=36
 VAL_INDICES_START=36
@@ -62,8 +63,8 @@ fi
 
 start=$(date +%s)
 
-# Train the model using all available GPUs and specified indices
-python $TRAIN_SCRIPT --output-dir ${RUN_DIR} --mode ${TRAIN_TYPE} --train-indices ${TRAIN_INDICES_START} ${TRAIN_INDICES_END} --val-indices ${VAL_INDICES_START} ${VAL_INDICES_END}
+# Train the model using all available GPUs, specified indices, and data path
+python $TRAIN_SCRIPT --output-dir ${RUN_DIR} --mode ${TRAIN_TYPE} --data-path ${DATA_PATH} --train-indices ${TRAIN_INDICES_START} ${TRAIN_INDICES_END} --val-indices ${VAL_INDICES_START} ${VAL_INDICES_END}
 
 end=$(date +%s)
 
