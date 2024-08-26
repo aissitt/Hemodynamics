@@ -1,9 +1,13 @@
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import json
+from glob import glob
 
 def load_dataset(file_path):
     # Load a NumPy dataset from the specified file path.
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"Dataset file not found: {file_path}")
     return np.load(file_path)
 
 def plot_training_history(history, output_dir):
@@ -50,7 +54,6 @@ def plot_training_history(history, output_dir):
 
 def save_hyperparameters(hyperparameters, output_dir):
     # Save hyperparameters to a JSON file.
-    import json
     hyperparameter_file = os.path.join(output_dir, 'hyperparameters.json')
     with open(hyperparameter_file, 'w') as f:
         json.dump(hyperparameters, f, indent=4)
@@ -87,3 +90,29 @@ def load_and_split_data(data_path, train_indices, val_indices):
 
     print(f"Loaded and split data: trainX {trainX_np.shape}, trainY {trainY_np.shape}, valX {valX_np.shape}, valY {valY_np.shape}")
     return trainX_np, trainY_np, valX_np, valY_np
+
+def get_latest_model_checkpoint(model_dir):
+    # Get the latest model checkpoint file from the specified directory.
+    checkpoints = glob(os.path.join(model_dir, "*.h5"))
+    if not checkpoints:
+        raise FileNotFoundError(f"No model checkpoints found in directory: {model_dir}")
+    latest_checkpoint = max(checkpoints, key=os.path.getctime)
+    print(f"Latest model checkpoint found: {latest_checkpoint}")
+    return latest_checkpoint
+
+def plot_evaluation_results(evaluation_results, output_dir):
+    # Plot evaluation results (e.g., RMSE, MAE) and save the plot.
+    metrics = ['rmse_per_component', 'nrmse_per_component', 'mae_per_component', 'nmae_per_component']
+    plt.figure(figsize=(10, 6))
+    for idx, metric in enumerate(metrics):
+        plt.subplot(2, 2, idx + 1)
+        plt.bar(range(len(evaluation_results)), evaluation_results)
+        plt.title(metric.replace('_', ' ').capitalize())
+        plt.xlabel('Component')
+        plt.ylabel(metric.split('_')[0].upper())
+
+    plot_path = os.path.join(output_dir, 'evaluation_results.png')
+    plt.tight_layout()
+    plt.savefig(plot_path)
+    plt.close()
+    print(f"Evaluation results plot saved to {plot_path}")
