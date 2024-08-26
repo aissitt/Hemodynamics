@@ -37,8 +37,7 @@ Hemodynamics/
 │   │       └── ...                   
 │   ├── ...                           
 │
-├── README.md                         # README file with project details and usage instructions
-└── requirements.txt                  # List of required Python packages (if using pip)
+└── README.md                         # README file with project details and usage instructions
 ```
 
 ## Setup Instructions
