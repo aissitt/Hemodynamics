@@ -3,11 +3,12 @@ import os
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from datetime import datetime
 import argparse
 from model import unet_model
 from loss import data_driven_loss, physics_informed_loss
 from metrics import RMSEPerComponent, NRMSEPerComponent, MAEPerComponent, NMAEPerComponent
-from utils import load_dataset, plot_training_history
+from utils import load_and_split_data, plot_training_history, create_output_directories, save_hyperparameters, log_runtime
 
 # Enable dynamic memory allocation for GPUs
 gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -20,32 +21,22 @@ parser.add_argument('--output-dir', required=True, help='Directory to save train
 parser.add_argument('--mode', choices=['data', 'physics'], required=True, help='Training mode: data-driven or physics-informed')
 args = parser.parse_args()
 
-# Load datasets
+# Load and split data
 lvad_data_path = '/home1/aissitt2019/LVAD/LVAD_data'
-trainX_np = load_dataset(os.path.join(lvad_data_path, 'lvad_rdfs_inlets.npy'))[:36]
-trainY_np = load_dataset(os.path.join(lvad_data_path, 'lvad_vels.npy'))[:36]
-valX_np = load_dataset(os.path.join(lvad_data_path, 'lvad_rdfs_inlets.npy'))[36:40]
-valY_np = load_dataset(os.path.join(lvad_data_path, 'lvad_vels.npy'))[36:40]
+trainX_np, trainY_np, valX_np, valY_np = load_and_split_data(lvad_data_path, train_indices=(0, 36), val_indices=(36, 40))
 
 # Create directories for this run
-output_dir = args.output_dir
-logs_dir = os.path.join(output_dir, "logs")
-images_dir = os.path.join(output_dir, "images")
-os.makedirs(logs_dir, exist_ok=True)
-os.makedirs(images_dir, exist_ok=True)
+output_dir, logs_dir, images_dir = create_output_directories(args.output_dir, "train_run_" + datetime.now().strftime("%Y%m%d_%H%M%S"))
 
 # Strategy for distributed training across GPUs
 strategy = tf.distribute.MirroredStrategy()
 
 with strategy.scope():
-    input_shape = (128, 128, 128, 2)  # Example input shape
+    input_shape = (128, 128, 128, 2)
     model = unet_model(input_shape)
 
     # Select loss function based on mode
-    if args.mode == 'data':
-        loss = data_driven_loss
-    else:
-        loss = physics_informed_loss
+    loss = data_driven_loss if args.mode == 'data' else physics_informed_loss
 
     # Compile the model
     model.compile(
@@ -70,3 +61,15 @@ with strategy.scope():
 
 # Plot training history
 plot_training_history(history, images_dir)
+
+# Save hyperparameters
+hyperparameters = {
+    'learning_rate': 0.001,
+    'batch_size': 1 * strategy.num_replicas_in_sync,
+    'epochs': 10000,
+    'loss': args.mode
+}
+save_hyperparameters(hyperparameters, output_dir)
+
+# Log runtime
+log_runtime(history.epoch[-1] + 1, logs_dir)
