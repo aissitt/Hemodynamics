@@ -27,7 +27,7 @@
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Define the training run directory to be evaluated
-TRAIN_RUN_DIR=$(ls -dt /home1/aissitt2019/Hemodynamics/LVAD/outputs/train_run_* | head -n 1)
+TRAIN_RUN_DIR=$(ls -dt /path/to/your/Hemodynamics/LVAD/outputs/train_run_* | head -n 1)
 
 # Create directories for this run under the corresponding training run folder
 RUN_DIR=${TRAIN_RUN_DIR}/eval_run_${TIMESTAMP}
@@ -38,8 +38,8 @@ RUN_DIR=${TRAIN_RUN_DIR}/eval_run_${TIMESTAMP}
 
 echo "Starting evaluation job on $(hostname) at $(date)"
 
-# Load conda environment named 'blood'
-. ./env.sh blood
+# Load conda environment named 'hemodynamics'
+. ./env.sh hemodynamics
 
 # Move to the LVAD directory containing the scripts
 cd /path/to/your/Hemodynamics/LVAD
@@ -51,17 +51,26 @@ export OUTPUT_DATA_PATH="/path/to/your/LVAD/LVAD_data/outputs.npy" # Expects sha
 # Parse the evaluation type argument
 EVAL_TYPE=$1
 
-if [[ "$EVAL_TYPE" == "data_driven" ]]; then
-    MODEL_PATH="${TRAIN_RUN_DIR}/lvad_model_*.h5"
-elif [[ "$EVAL_TYPE" == "physics" ]]; then
-    MODEL_PATH="${TRAIN_RUN_DIR}/lvad_model_*.h5"
-else
-    echo "Invalid evaluation type specified. Use 'data_driven' or 'physics'."
-    exit 1
-fi
+# Optional: Specify a model path argument
+MODEL_PATH_ARG=$2
 
-# Find the most recent model file for evaluation
-LATEST_MODEL=$(ls -t $MODEL_PATH | head -n 1)
+# Check if a specific model path is provided; if not, default to the most recent model
+if [[ -z "$MODEL_PATH_ARG" ]]; then
+    if [[ "$EVAL_TYPE" == "data_driven" ]]; then
+        MODEL_PATH="${TRAIN_RUN_DIR}/lvad_model_*.h5"
+    elif [[ "$EVAL_TYPE" == "physics" ]]; then
+        MODEL_PATH="${TRAIN_RUN_DIR}/lvad_model_*.h5"
+    else
+        echo "Invalid evaluation type specified. Use 'data_driven' or 'physics'."
+        exit 1
+    fi
+
+    # Find the most recent model file for evaluation
+    LATEST_MODEL=$(ls -t $MODEL_PATH | head -n 1)
+else
+    # Use the provided model path argument
+    LATEST_MODEL=$MODEL_PATH_ARG
+fi
 
 start=$(date +%s)
 
