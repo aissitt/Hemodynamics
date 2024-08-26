@@ -1,7 +1,7 @@
 
 # Hemodynamics
 
-This repository contains code for training and evaluating deep learning models for hemodynamic simulations, specifically focusing on Left Ventricular Assist Device (LVAD) data. The repository supports both data-driven and physics-informed models using a 3D U-Net architecture.
+This repository contains code for training and evaluating deep learning models for hemodynamic simulations, specifically focusing on Left Ventricular Assist Device (LVAD) and aneurysm data. The repository supports both data-driven and physics-informed models using a 3D U-Net architecture.
 
 ## Project Structure
 
@@ -38,8 +38,7 @@ Hemodynamics/
 │   │       └── ...                   
 │   ├── ...                           
 │
-├── README.md                         # README file with project details and usage instructions
-└── requirements.txt                  # List of required Python packages (if using pip)
+└── README.md                         # README file with project details and usage instructions
 ```
 
 ## Setup Instructions
