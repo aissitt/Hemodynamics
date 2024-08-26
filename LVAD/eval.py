@@ -26,7 +26,7 @@ parser.add_argument('--output-dir', required=True, help='Directory to save evalu
 parser.add_argument('--test-indices', required=True, nargs=2, type=int, help='Start and end indices for the test data')
 args = parser.parse_args()
 
-lvad_data_path = '/home1/aissitt2019/LVAD/LVAD_data'
+lvad_data_path = '/path/to/your/LVAD_data'
 high_error_threshold = 0.01  # Define a threshold for high error
 
 # Load dataset
