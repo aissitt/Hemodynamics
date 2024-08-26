@@ -10,9 +10,9 @@ PHYSICS_HYPERPARAMETERS = {
     "lambda_data": 1.0,
     "lambda_continuity": 0.001,
     "lambda_vorticity_focused": 0.1,
-    "threshold_vorticity": 0.0437,
+    "threshold_vorticity": 0.0437, # 95th percentile value of vorticity distribution
     "lambda_momentum": 0.001,
-    "nu": 3.5e-6,
+    "nu": 3.5e-6, # Units^2/s
     "huber_delta": 0.1,
     "input_shape": (128, 128, 128, 2)
 }
