@@ -19,6 +19,7 @@ Hemodynamics/
 │   └── slurm/                        
 │       ├── train_multigpu.sh         # SLURM script for launching training jobs
 │       ├── eval_multigpu.sh          # SLURM script for launching evaluation jobs
+|       ├── create_env.sh             # SLURM Script for creating the environment
 │       └── env.sh                    # Script for setting up the environment
 │
 ├── outputs/                          
@@ -37,6 +38,9 @@ Hemodynamics/
 │   │       └── ...                   
 │   ├── ...                           
 │
+├── Aneurysm/
+|   ├── Similar structure ...
+|
 └── README.md                         # README file with project details and usage instructions
 ```
 
