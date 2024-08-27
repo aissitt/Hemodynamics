@@ -49,12 +49,12 @@ export OUTPUT_DATA_PATH="/path/to/your/LVAD/LVAD_data/outputs.npy" # Expects sha
 # Parse the training type argument
 TRAIN_TYPE=$1
 
-if [[ "$TRAIN_TYPE" == "data_driven" ]]; then
+if [[ "$TRAIN_TYPE" == "data" ]]; then
     TRAIN_SCRIPT="train.py"
 elif [[ "$TRAIN_TYPE" == "physics" ]]; then
     TRAIN_SCRIPT="train.py"
 else
-    echo "Invalid training type specified. Use 'data_driven' or 'physics'."
+    echo "Invalid training type specified. Use 'data' or 'physics'."
     exit 1
 fi
 
