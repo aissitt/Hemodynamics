@@ -62,12 +62,13 @@ Hemodynamics/
    cd slurm
 
 2. **Set Up the Conda Environment**:
+   We use a SLURM script for this since some packages require GPU installation, and the login node of AIPanther doesn't have GPU access.
    ```bash
-   conda env create -f environment.yml
+   sbatch create_env.sh
    conda activate hemodynamics
    ```
 
-3. **Configure Environment Variables** (if using `use_env_vars` in `config.json`):
+4. **Configure Environment Variables** (if using `use_env_vars` in `config.json`):
    ```bash
    export INPUT_DATA_PATH=/path/to/input/data
    export OUTPUT_DATA_PATH=/path/to/output/data
