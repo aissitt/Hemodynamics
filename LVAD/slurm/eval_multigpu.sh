@@ -11,8 +11,7 @@
 ##################################
 
 # Use GPU partition (gpu1 and gpu2) or other partition (e.g.: short)
-# Find more usable partitions with 'sinfo -a'
-#SBATCH --partition=gpu1
+#SBATCH --partition=gpu2
 
 # Configure the number of nodes (in partition above)
 #SBATCH --nodes=1
@@ -27,10 +26,12 @@
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Define the training run directory to be evaluated
-TRAIN_RUN_DIR=$(ls -dt /path/to/your/Hemodynamics/LVAD/outputs/train_run_* | head -n 1)
+TRAIN_RUN_DIR=$(ls -dt /home1/aissitt2019/Hemodynamics/LVAD/outputs/train_run_* | head -n 1)
 
 # Create directories for this run under the corresponding training run folder
 RUN_DIR=${TRAIN_RUN_DIR}/eval_run_${TIMESTAMP}
+mkdir -p ${RUN_DIR}/images
+mkdir -p ${RUN_DIR}/logs
 
 # Direct output and error files to the run-specific directory
 #SBATCH --output=${TRAIN_RUN_DIR}/LVAD_Eval_MultiGPU_%j.out
@@ -42,11 +43,11 @@ echo "Starting evaluation job on $(hostname) at $(date)"
 . ./env.sh hemodynamics
 
 # Move to the LVAD directory containing the scripts
-cd /path/to/your/Hemodynamics/LVAD
+cd /home1/aissitt2019/Hemodynamics/LVAD
 
 # Set environment variables for data paths
-export INPUT_DATA_PATH="/path/to/your/LVAD/LVAD_data/inputs.npy" # Expects shape (x, 128, 128, 128, 2) where x is the number of samples, 128x128x128 represents the geometry, and 2 represents rdf and inlet values
-export OUTPUT_DATA_PATH="/path/to/your/LVAD/LVAD_data/outputs.npy" # Expects shape (x, 128, 128, 128, 3) where x is the number of samples, 128x128x128 represents the geometry, and 3 represents velocity components
+export INPUT_DATA_PATH="/home1/aissitt2019/LVAD/LVAD_data/lvad_rdfs_inlets.npy" # Expects shape (x, 128, 128, 128, 2) where x is the number of samples, 128x128x128 represents the geometry, and 2 represents rdf and inlet values
+export OUTPUT_DATA_PATH="/home1/aissitt2019/LVAD/LVAD_data/lvad_vels.npy" # Expects shape (x, 128, 128, 128, 3) where x is the number of samples, 128x128x128 represents the geometry, and 3 represents velocity components
 
 # Parse the evaluation type argument
 EVAL_TYPE=$1
@@ -66,7 +67,11 @@ if [[ -z "$MODEL_PATH_ARG" ]]; then
     fi
 
     # Find the most recent model file for evaluation
-    LATEST_MODEL=$(ls -t $MODEL_PATH | head -n 1)
+    LATEST_MODEL=$(ls -t $MODEL_PATH 2>/dev/null | head -n 1)
+    if [[ -z "$LATEST_MODEL" ]]; then
+        echo "No model file found matching pattern $MODEL_PATH"
+        exit 1
+    fi
 else
     # Use the provided model path argument
     LATEST_MODEL=$MODEL_PATH_ARG
@@ -75,7 +80,7 @@ fi
 start=$(date +%s)
 
 # Evaluate the model using all available GPUs
-python eval.py --model-path $LATEST_MODEL --mode ${EVAL_TYPE} --output-dir ${RUN_DIR}
+python eval.py --model-path "$LATEST_MODEL" --mode ${EVAL_TYPE} --output-dir ${RUN_DIR}
 
 end=$(date +%s)
 

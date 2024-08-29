@@ -4,9 +4,16 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import argparse
 import json
-from model import RMSEPerComponent, NRMSEPerComponent, MAEPerComponent, NMAEPerComponent
+from metrics import RMSEPerComponent, NRMSEPerComponent, MAEPerComponent, NMAEPerComponent
 from loss import data_driven_loss, physics_informed_loss
 from utils import load_dataset, apply_mask, compute_errors, compute_high_error_metrics, plot_error_maps
+
+# Define named functions for loss (same as in train.py)
+def data_loss_fn(y_true, y_pred):
+    return data_driven_loss(y_true, y_pred, config)
+
+def physics_loss_fn(y_true, y_pred):
+    return physics_informed_loss(y_true, y_pred, config)
 
 # Define custom objects for loading the model
 custom_objects = {
@@ -14,8 +21,8 @@ custom_objects = {
     "NRMSEPerComponent": NRMSEPerComponent,
     "MAEPerComponent": MAEPerComponent,
     "NMAEPerComponent": NMAEPerComponent,
-    "data_driven_loss": data_driven_loss,
-    "physics_informed_loss": physics_informed_loss
+    "data_loss_fn": data_loss_fn,
+    "physics_loss_fn": physics_loss_fn
 }
 
 # Load configuration

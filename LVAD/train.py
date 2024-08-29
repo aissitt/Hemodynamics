@@ -27,9 +27,20 @@ if config.get("use_env_vars", False):
 
 # Argument parser for command-line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('--output-dir', required=True, help='Directory to save training results')
+parser.add_argument('--output-dir', required=True, help='Base directory to save training results')
 parser.add_argument('--mode', choices=['data', 'physics'], required=True, help='Training mode: data-driven or physics-informed')
 args = parser.parse_args()
+
+# Use the output directory provided by the SLURM script, do not create a nested directory
+output_dir = args.output_dir
+logs_dir = os.path.join(output_dir, "logs")
+images_dir = os.path.join(output_dir, "images")
+
+# Create necessary directories if they don't exist
+os.makedirs(logs_dir, exist_ok=True)
+os.makedirs(images_dir, exist_ok=True)
+
+print(f"Using output directory: {output_dir}, logs directory: {logs_dir}, images directory: {images_dir}")
 
 # Load and split data using indices provided in config
 trainX_np, trainY_np, valX_np, valY_np = load_and_split_data(
@@ -39,8 +50,12 @@ trainX_np, trainY_np, valX_np, valY_np = load_and_split_data(
     config["training"]["val_indices"]
 )
 
-# Create directories for this run
-output_dir, logs_dir, images_dir = create_output_directories(args.output_dir, "train_run_" + datetime.now().strftime("%Y%m%d_%H%M%S"))
+# Define named functions for loss
+def data_loss_fn(y_true, y_pred):
+    return data_driven_loss(y_true, y_pred, config)
+
+def physics_loss_fn(y_true, y_pred):
+    return physics_informed_loss(y_true, y_pred, config)
 
 # Strategy for distributed training across GPUs
 strategy = tf.distribute.MirroredStrategy()
@@ -49,18 +64,19 @@ with strategy.scope():
     input_shape = tuple(config["model"]["input_shape"])
     model = unet_model(input_shape)
 
-    # Select loss function based on mode and pass config if needed
+    # Compile the model with the appropriate loss function based on the mode
     if args.mode == 'data':
-        loss = lambda y_true, y_pred: data_driven_loss(y_true, y_pred, config)
+        model.compile(
+            loss=data_loss_fn,
+            optimizer=Adam(learning_rate=config["training"]["learning_rate"]),
+            metrics=[RMSEPerComponent(), NRMSEPerComponent(), MAEPerComponent(), NMAEPerComponent()]
+        )
     else:
-        loss = lambda y_true, y_pred: physics_informed_loss(y_true, y_pred, config)
-
-    # Compile the model
-    model.compile(
-        loss=loss,
-        optimizer=Adam(learning_rate=config["training"]["learning_rate"]),
-        metrics=[RMSEPerComponent(), NRMSEPerComponent(), MAEPerComponent(), NMAEPerComponent()]
-    )
+        model.compile(
+            loss=physics_loss_fn,
+            optimizer=Adam(learning_rate=config["training"]["learning_rate"]),
+            metrics=[RMSEPerComponent(), NRMSEPerComponent(), MAEPerComponent(), NMAEPerComponent()]
+        )
 
     # Callbacks
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
