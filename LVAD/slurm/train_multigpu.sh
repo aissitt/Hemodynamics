@@ -32,7 +32,7 @@ echo "Starting training job on $(hostname) at $(date)"
 . ./env.sh hemodynamics
 
 # Move to the LVAD directory containing the scripts
-cd /home1/aissitt2019/Hemodynamics/LVAD
+cd /path/to/your/Hemodynamics/LVAD
 
 # Set environment variables for data paths
 export INPUT_DATA_PATH="/path/to/your/Hemodynamics/LVAD/LVAD_data/lvad_rdfs_inlets.npy"
