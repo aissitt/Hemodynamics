@@ -128,7 +128,8 @@ The `config.json` file contains all the configurations for training and evaluati
       "lambda_vorticity_focused": 0.1,
       "threshold_vorticity": 0.0437,
       "lambda_momentum": 0.001,
-      "nu": 3.5e-6
+      "nu": 3.5e-6,
+      "huber_delta": 0.1
     }
   },
   "model": {
