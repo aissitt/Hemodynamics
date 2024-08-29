@@ -34,7 +34,7 @@ echo "Starting environment setup job on $(hostname) at $(date)"
 ##################################
 
 # Set the path to your project directory
-REPO_PATH="${REPO_PATH:-/home1/aissitt2019/Hemodynamics/LVAD}"
+REPO_PATH="${REPO_PATH:-/path/to/your/Hemodynamics/LVAD}"
 ENV_YML_PATH="$REPO_PATH/environment.yml"
 REQ_TXT_PATH="$REPO_PATH/requirements.txt"
 
