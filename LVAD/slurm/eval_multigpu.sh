@@ -43,7 +43,7 @@ echo "Starting evaluation job on $(hostname) at $(date)"
 . ./env.sh hemodynamics
 
 # Move to the LVAD directory containing the scripts
-cd /home1/aissitt2019/Hemodynamics/LVAD
+cd /path/to/your/Hemodynamics/LVAD
 
 # Set environment variables for data paths
 export INPUT_DATA_PATH="/path/to/your/Hemodynamics/LVAD/LVAD_data/lvad_rdfs_inlets.npy" # Expects shape (x, 128, 128, 128, 2) where x is the number of samples, 128x128x128 represents the geometry, and 2 represents rdf and inlet values
