@@ -59,11 +59,17 @@ mask = rdf > 0
 # Load the best model
 best_model = tf.keras.models.load_model(args.model_path, custom_objects=custom_objects)
 
-# Make predictions on the sample batch
-predictions = best_model.predict(testX_np)
+# Evaluate the model on test data to obtain metrics
+results = best_model.evaluate(testX_np, testY_np, return_dict=True)
+print(f"Evaluation results: {results}")
 
-# Compute errors and metrics
-abs_errors, peak_error, peak_error_coords = compute_errors(testY_np, predictions, mask)
+# Convert any NumPy arrays in results to lists for JSON serialization
+for key in results:
+    if isinstance(results[key], np.ndarray):
+        results[key] = results[key].tolist()
+
+# Compute additional error metrics
+abs_errors, peak_error, peak_error_coords = compute_errors(testY_np, best_model.predict(testX_np), mask)
 high_error_threshold = config["loss_parameters"].get("high_error_threshold", 0.01)  # Default to 0.01 if not specified
 high_error_count, high_error_percentage = compute_high_error_metrics(abs_errors, high_error_threshold)
 
@@ -75,17 +81,22 @@ metrics = {
     "Percentage of high error points": float(high_error_percentage)
 }
 
+# Combine evaluation results with custom metrics
+metrics.update(results)
+
 # Ensure logs directory exists
 logs_dir = os.path.join(args.output_dir, "logs")
 os.makedirs(logs_dir, exist_ok=True)
 
+# Save metrics to a JSON file
 metrics_file = os.path.join(logs_dir, "metrics.json")
 with open(metrics_file, 'w') as f:
     json.dump(metrics, f, indent=4)
+print(f"Metrics saved to {metrics_file}")
 
 # Plot and save error maps
 images_dir = os.path.join(args.output_dir, "images")
 os.makedirs(images_dir, exist_ok=True)
-plot_error_maps(testY_np, predictions, abs_errors, peak_error_coords, images_dir, mask)
+plot_error_maps(testY_np, best_model.predict(testX_np), abs_errors, peak_error_coords, images_dir, mask)
 
 print(f"Evaluation completed. Results saved to {args.output_dir}")
