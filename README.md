@@ -10,6 +10,7 @@ Hemodynamics/
 ├── LVAD/                             
 │   ├── config.json                   # Configuration file for training and evaluation
 │   ├── environment.yml               # Conda environment file for setting up dependencies
+|   ├── requirements.txt              # More dependencies
 │   ├── loss.py                       # Script containing custom loss functions
 │   ├── metrics.py                    # Script containing custom metrics
 │   ├── model.py                      # Script defining the model architecture (UNet)
