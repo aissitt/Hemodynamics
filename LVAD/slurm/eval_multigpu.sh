@@ -26,7 +26,7 @@
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Define the training run directory to be evaluated
-TRAIN_RUN_DIR=$(ls -dt /home1/aissitt2019/Hemodynamics/LVAD/outputs/train_run_* | head -n 1)
+TRAIN_RUN_DIR=$(ls -dt /path/to/your/Hemodynamics/LVAD/outputs/train_run_* | head -n 1)
 
 # Create directories for this run under the corresponding training run folder
 RUN_DIR=${TRAIN_RUN_DIR}/eval_run_${TIMESTAMP}
@@ -46,8 +46,8 @@ echo "Starting evaluation job on $(hostname) at $(date)"
 cd /home1/aissitt2019/Hemodynamics/LVAD
 
 # Set environment variables for data paths
-export INPUT_DATA_PATH="/home1/aissitt2019/LVAD/LVAD_data/lvad_rdfs_inlets.npy" # Expects shape (x, 128, 128, 128, 2) where x is the number of samples, 128x128x128 represents the geometry, and 2 represents rdf and inlet values
-export OUTPUT_DATA_PATH="/home1/aissitt2019/LVAD/LVAD_data/lvad_vels.npy" # Expects shape (x, 128, 128, 128, 3) where x is the number of samples, 128x128x128 represents the geometry, and 3 represents velocity components
+export INPUT_DATA_PATH="/path/to/your/Hemodynamics/LVAD/LVAD_data/lvad_rdfs_inlets.npy" # Expects shape (x, 128, 128, 128, 2) where x is the number of samples, 128x128x128 represents the geometry, and 2 represents rdf and inlet values
+export OUTPUT_DATA_PATH="/path/to/your/Hemodynamics/LVAD/LVAD_data/lvad_vels.npy" # Expects shape (x, 128, 128, 128, 3) where x is the number of samples, 128x128x128 represents the geometry, and 3 represents velocity components
 
 # Parse the evaluation type argument
 EVAL_TYPE=$1

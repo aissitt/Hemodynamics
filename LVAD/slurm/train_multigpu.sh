@@ -20,7 +20,7 @@
 #SBATCH --job-name=LVAD_Train_MultiGPU
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-OUTPUT_BASE_DIR=/home1/aissitt2019/Hemodynamics/LVAD/outputs
+OUTPUT_BASE_DIR=/path/to/your/Hemodynamics/LVAD/outputs
 RUN_DIR=${OUTPUT_BASE_DIR}/train_run_${TIMESTAMP}
 
 #SBATCH --output=${RUN_DIR}/LVAD_Train_MultiGPU_%j.out
@@ -35,8 +35,8 @@ echo "Starting training job on $(hostname) at $(date)"
 cd /home1/aissitt2019/Hemodynamics/LVAD
 
 # Set environment variables for data paths
-export INPUT_DATA_PATH="/home1/aissitt2019/LVAD/LVAD_data/lvad_rdfs_inlets.npy"
-export OUTPUT_DATA_PATH="/home1/aissitt2019/LVAD/LVAD_data/lvad_vels.npy"
+export INPUT_DATA_PATH="/path/to/your/Hemodynamics/LVAD/LVAD_data/lvad_rdfs_inlets.npy"
+export OUTPUT_DATA_PATH="/path/to/your/Hemodynamics/LVAD/LVAD_data/lvad_vels.npy"
 
 # Parse the training type argument
 TRAIN_TYPE=$1
