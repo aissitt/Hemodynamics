@@ -43,7 +43,7 @@ def log_runtime(runtime, logs_dir):
     # Log the runtime of the training process to a file in the logs directory.
     runtime_log_file = os.path.join(logs_dir, 'runtime.log')
     with open(runtime_log_file, 'w') as f:
-        f.write(f"Total runtime: {runtime} seconds\n")
+        f.write(f"Total runtime: {runtime} epochs\n") 
     print(f"Runtime logged to {runtime_log_file}")
 
 def create_output_directories(base_dir, run_name):
@@ -72,12 +72,21 @@ def load_and_split_data(input_data_path, output_data_path, train_indices, val_in
     return trainX_np, trainY_np, valX_np, valY_np
 
 def apply_mask(data, mask):
-    # Apply a binary mask to the data.
+    # Ensure the mask has the same batch size as the data
+    if len(mask.shape) == 3:  # If mask is missing the batch dimension
+        mask = np.expand_dims(mask, axis=0)  # Add a batch dimension to the mask
+
+    if mask.shape[0] == 1 and data.shape[0] > 1:
+        # Tile the mask to match the batch size of the data
+        mask = np.tile(mask, (data.shape[0], 1, 1, 1))
+
+    # Expand the mask to match the number of channels in the data
     expanded_mask = np.repeat(mask[..., np.newaxis], data.shape[-1], axis=-1)
+    
     return np.ma.masked_where(~expanded_mask, data)
 
 def compute_errors(true_values, predicted_values, mask):
-    # Compute absolute errors, peak error, and coordinates of peak error.
+    # Compute absolute errors, peak error, and coordinates of peak error
     true_values_masked = apply_mask(true_values, mask)
     predicted_values_masked = apply_mask(predicted_values, mask)
 
