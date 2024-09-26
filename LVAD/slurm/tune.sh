@@ -12,7 +12,7 @@
 #SBATCH --job-name=LVAD_Tune_MultiGPU  # Job name
 #SBATCH --exclusive
 # Create output directory for logs if it doesn't exist
-LOG_DIR="/home1/aissitt2019/Hemodynamics/LVAD/tuning_logs"
+LOG_DIR="/path/to/your/Hemodynamics/LVAD/tuning_logs"
 mkdir -p $LOG_DIR
 
 # SLURM output and error files
@@ -28,8 +28,8 @@ echo "Starting tuning job on $(hostname) at $(date)"
 cd /home1/aissitt2019/Hemodynamics/LVAD
 
 # Set environment variables for data paths
-export INPUT_DATA_PATH="/home1/aissitt2019/LVAD/LVAD_data/lvad_rdfs_inlets.npy"
-export OUTPUT_DATA_PATH="/home1/aissitt2019/LVAD/LVAD_data/lvad_vels.npy"
+export INPUT_DATA_PATH="/path/to/your/LVAD/LVAD_data/lvad_rdfs_inlets.npy"
+export OUTPUT_DATA_PATH="/path/to/your/LVAD/LVAD_data/lvad_vels.npy"
 
 # Set N_TRIALS environment variable
 export N_TRIALS=100
@@ -37,4 +37,4 @@ export N_TRIALS=100
 # nvidia-smi -l 300 & # Log GPU memory usage every 5 mins
 
 # Run tuning with the specified mode (data or physics)
-python tune.py --output-dir "/home1/aissitt2019/Hemodynamics/LVAD/tuning_outputs" --mode "$1" --config "/home1/aissitt2019/Hemodynamics/LVAD/config.json"
+python tune.py --output-dir "/path/to/your/Hemodynamics/LVAD/tuning_outputs" --mode "$1" --config "/path/to/your/Hemodynamics/LVAD/config.json"
