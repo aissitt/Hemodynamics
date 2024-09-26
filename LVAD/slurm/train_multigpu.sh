@@ -11,10 +11,10 @@
 ##################################
 
 # Use GPU partition (gpu1 and gpu2) or other partition (e.g.: short)
-#SBATCH --partition=gpu2
+#SBATCH --partition=gpu1
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=4
-#SBATCH --gpus-per-node=1
+#SBATCH --gpus-per-node=4
 #SBATCH --time=3-00:00:00
 #SBATCH --job-name=LVAD_Train_MultiGPU
 
@@ -31,7 +31,7 @@ if [[ "$TRAIN_TYPE" != "data" && "$TRAIN_TYPE" != "physics" ]]; then
 fi
 
 # Define the base directory for training runs
-OUTPUT_BASE_DIR=/home1/aissitt2019/Hemodynamics/LVAD/outputs
+OUTPUT_BASE_DIR=/path/to/your/Hemodynamics/LVAD/outputs
 
 # Define the run directory at the top level, including the timestamp
 RUN_DIR=${OUTPUT_BASE_DIR}/${TRAIN_TYPE}/train_run_${TIMESTAMP}
@@ -53,8 +53,8 @@ echo "Starting training job on $(hostname) at $(date)"
 cd /path/to/your/Hemodynamics/LVAD
 
 # Set environment variables for data paths
-export INPUT_DATA_PATH="/home1/aissitt2019/LVAD/LVAD_data/lvad_rdfs_inlets.npy"     # Expects shape (x, 128, 128, 128, 2)
-export OUTPUT_DATA_PATH="/home1/aissitt2019/LVAD/LVAD_data/lvad_vels.npy"           # Expects shape (x, 128, 128, 128, 3)
+export INPUT_DATA_PATH="/path/to/your/LVAD/LVAD_data/lvad_rdfs_inlets.npy"     # Expects shape (x, 128, 128, 128, 2)
+export OUTPUT_DATA_PATH="/path/to/your/LVAD/LVAD_data/lvad_vels.npy"           # Expects shape (x, 128, 128, 128, 3)
 
 start=$(date +%s)
 
