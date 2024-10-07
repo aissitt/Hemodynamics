@@ -57,6 +57,8 @@ if args.use_tuning:
                 config["loss_parameters"]["physics_informed"]["lambda_data"] = best_params.get("lambda_data", config["loss_parameters"]["physics_informed"]["lambda_data"])
                 config["loss_parameters"]["physics_informed"]["lambda_continuity"] = best_params.get("lambda_continuity", config["loss_parameters"]["physics_informed"]["lambda_continuity"])
                 config["loss_parameters"]["physics_informed"]["lambda_vorticity_focused"] = best_params.get("lambda_vorticity_focused", config["loss_parameters"]["physics_informed"]["lambda_vorticity_focused"])
+                config["loss_parameters"]["physics_informed"]["lambda_momentum"] = best_params.get("lambda_momentum", config["loss_parameters"]["physics_informed"]["lambda_momentum"])
+                config["loss_parameters"]["physics_informed"]["lambda_gradient_penalty"] = best_params.get("lambda_gradient_penalty", config["loss_parameters"]["physics_informed"]["lambda_gradient_penalty"]) 
     else:
         print(f"No best_params_{args.mode}.json found. Using default config values.")
 

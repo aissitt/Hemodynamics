@@ -43,7 +43,7 @@ print(f"Created output directories: {output_dir}, {logs_dir}, {images_dir}")
 # Define the objective function for Optuna
 def objective(trial):
     # Suggest hyperparameters for tuning
-    learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-3, log=True)
+    learning_rate = trial.suggest_float("learning_rate", 1e-6, 1e-1, log=True)
     batch_size = trial.suggest_categorical("batch_size", [1])
     
     # Make activation dynamic
@@ -59,10 +59,12 @@ def objective(trial):
 
     # Physics-specific parameters
     if args.mode == 'physics':
-        lambda_data = trial.suggest_float("lambda_data", 0.5, 1.5)
-        lambda_continuity = trial.suggest_float("lambda_continuity", 1e-8, 1e-2, log=True)
-        lambda_vorticity_focused = trial.suggest_float("lambda_vorticity_focused", 1e-5, 0.5)
-        lambda_momentum = trial.suggest_float("lambda_momentum", 1e-6, 1e-1, log=True)
+        lambda_data = trial.suggest_float("lambda_data", 0.1, 2)
+        lambda_continuity = trial.suggest_float("lambda_continuity", 1e-6, 1, log=True)
+        lambda_vorticity_focused = trial.suggest_float("lambda_vorticity_focused", .1, 1.5)
+        lambda_momentum = trial.suggest_float("lambda_momentum", 1e-2, 1.5, log=True)
+        lambda_gradient_penalty = trial.suggest_float("lambda_gradient_penalty", 1e-3, 1.5, log=True)
+        huber_delta = trial.suggest_float("huber_delta", 1e-3, 1.5)  
 
         # Update config with suggested hyperparameters
         config = base_config.copy()
@@ -72,6 +74,8 @@ def objective(trial):
         config["loss_parameters"]["physics_informed"]["lambda_continuity"] = lambda_continuity
         config["loss_parameters"]["physics_informed"]["lambda_vorticity_focused"] = lambda_vorticity_focused
         config["loss_parameters"]["physics_informed"]["lambda_momentum"] = lambda_momentum
+        config["loss_parameters"]["physics_informed"]["lambda_gradient_penalty"] = lambda_gradient_penalty
+        config["loss_parameters"]["physics_informed"]["huber_delta"] = huber_delta  
     else:
         # Data-specific parameter: tune huber delta
         huber_delta = trial.suggest_float("huber_delta", 0.01, 1.0)
