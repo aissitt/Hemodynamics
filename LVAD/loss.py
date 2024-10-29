@@ -15,12 +15,13 @@ def compute_vorticity(predictedY):
     with tf.GradientTape(persistent=True) as tape:
         tape.watch(predictedY)
         u, v, w = predictedY[..., 0], predictedY[..., 1], predictedY[..., 2]
-    du_dy = tape.gradient(u, predictedY)[..., 1]
-    du_dz = tape.gradient(u, predictedY)[..., 2]
-    dv_dx = tape.gradient(v, predictedY)[..., 0]
-    dv_dz = tape.gradient(v, predictedY)[..., 2]
-    dw_dx = tape.gradient(w, predictedY)[..., 0]
-    dw_dy = tape.gradient(w, predictedY)[..., 1]
+        du_dy = tape.gradient(u, predictedY)[..., 1]
+        du_dz = tape.gradient(u, predictedY)[..., 2]
+        dv_dx = tape.gradient(v, predictedY)[..., 0]
+        dv_dz = tape.gradient(v, predictedY)[..., 2]
+        dw_dx = tape.gradient(w, predictedY)[..., 0]
+        dw_dy = tape.gradient(w, predictedY)[..., 1]
+    del tape  # Explicitly delete the tape to free resources
     omega_x = dw_dy - dv_dz
     omega_y = du_dz - dw_dx
     omega_z = dv_dx - du_dy
@@ -49,6 +50,7 @@ def compute_continuity_loss(predictedY):
         du_dx = tape.gradient(u, predictedY)[..., 0]
         dv_dy = tape.gradient(v, predictedY)[..., 1]
         dw_dz = tape.gradient(w, predictedY)[..., 2]
+    del tape  # Explicitly delete the tape to free resources
     continuity_residual = du_dx + dv_dy + dw_dz
     continuity_loss = tf.reduce_mean(tf.square(continuity_residual))
     return continuity_loss
@@ -72,6 +74,7 @@ def compute_momentum_loss(predictedY, nu):
         lap_w = dw_dx + dw_dy + dw_dz
         diffusion_term = tf.stack([lap_u, lap_v, lap_w], axis=-1)
         momentum_residual = convective_acceleration - nu * diffusion_term
+    del tape  # Explicitly delete the tape to free resources
     momentum_loss = tf.reduce_mean(tf.square(momentum_residual))
     return momentum_loss
 
@@ -79,9 +82,9 @@ def compute_gradient_penalty(y_pred):
     with tf.GradientTape(persistent=True) as tape:
         tape.watch(y_pred)
         u, v, w = y_pred[..., 0], y_pred[..., 1], y_pred[..., 2]
-    grad_u = tape.gradient(u, y_pred)
-    grad_v = tape.gradient(v, y_pred)
-    grad_w = tape.gradient(w, y_pred)
+        grad_u = tape.gradient(u, y_pred)
+        grad_v = tape.gradient(v, y_pred)
+        grad_w = tape.gradient(w, y_pred)
     del tape  # Explicitly delete the tape to free resources
 
     # Calculate the magnitude of the gradients

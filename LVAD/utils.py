@@ -46,9 +46,13 @@ def log_runtime(runtime, logs_dir):
         f.write(f"Total runtime: {runtime} epochs\n") 
     print(f"Runtime logged to {runtime_log_file}")
 
-def create_output_directories(base_dir, run_name):
-    # Create directories for output, logs, and images under the base directory.
-    output_dir = os.path.join(base_dir, run_name)
+def create_output_directories(base_dir, run_name=None):
+    # Only append run_name if it's provided, otherwise just use base_dir
+    if run_name:
+        output_dir = os.path.join(base_dir, run_name)
+    else:
+        output_dir = base_dir
+
     logs_dir = os.path.join(output_dir, "logs")
     images_dir = os.path.join(output_dir, "images")
 

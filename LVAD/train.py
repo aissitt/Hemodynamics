@@ -25,42 +25,67 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--output-dir', required=True, help='Base directory to save training results')
 parser.add_argument('--mode', choices=['data', 'physics'], required=True, help='Training mode: data-driven or physics-informed')
 parser.add_argument('--config', help='Path to custom config file', default='config.json')
-parser.add_argument('--use-tuning', action='store_true', help='Flag to use tuned hyperparameters from best_params.json')
+parser.add_argument('--use-tuning', action='store_true', help='Flag to use the best configuration from tuning')
+parser.add_argument('--config-path', help='Path to specific config file (overrides default or tuning path)')
+parser.add_argument('--seed', type=int, help='Set a seed for reproducibility (overrides config or tuning seed)')
+
 args = parser.parse_args()
 
 # Load configuration
-if args.config:
-    with open(args.config, 'r') as f:
+if args.use_tuning:
+    # Base directory for tuning outputs
+    tuning_dir = os.path.join("/home1/aissitt2019/Hemodynamics/LVAD/tuning_outputs", args.mode)
+    
+    # Locate the most recent tuning run directory
+    if os.path.exists(tuning_dir) and os.listdir(tuning_dir):
+        tuning_run_dir = max([os.path.join(tuning_dir, d) for d in os.listdir(tuning_dir)], key=os.path.getmtime)
+    else:
+        raise FileNotFoundError(f"No tuning runs found in {tuning_dir}. Please ensure you have performed a tuning run first.")
+
+    # Locate the most recent config file within the tuning run
+    best_config_path = os.path.join(tuning_run_dir, 'logs', f'best_config_{args.mode}.json')
+    if os.path.exists(best_config_path):
+        with open(best_config_path, 'r') as f:
+            config = json.load(f)
+        print(f"Loaded best configuration from {best_config_path}")
+
+        # Load the seed from the best config if present
+        config_seed = config["training"].get("seed", None)
+    else:
+        raise FileNotFoundError(f"Best configuration not found in {tuning_run_dir}.")
+elif args.config_path:
+    with open(args.config_path, 'r') as f:
         config = json.load(f)
+    print(f"Loaded configuration from {args.config_path}")
+
+    # Check if a seed is provided in the config file
+    config_seed = config["training"].get("seed", None)
 else:
-    with open('config.json', 'r') as f:
-        config = json.load(f)
+    # Load default or specified config
+    if args.config:
+        with open(args.config, 'r') as f:
+            config = json.load(f)
+    else:
+        with open('config.json', 'r') as f:
+            config = json.load(f)
 
 # Add mode from args to config
 config["mode"] = args.mode  # This ensures "mode" is available in the config dictionary.
 
-# If using environment variables, replace placeholders with their values
-if config.get("use_env_vars", False):
-    config["training"]["input_data"] = os.getenv("INPUT_DATA_PATH")
-    config["training"]["output_data"] = os.getenv("OUTPUT_DATA_PATH")
+# Resolve environment variables for input and output data paths
+config["training"]["input_data"] = os.getenv("INPUT_DATA_PATH", config["training"]["input_data"])
+config["training"]["output_data"] = os.getenv("OUTPUT_DATA_PATH", config["training"]["output_data"])
 
-# Check if best_params.json exists for tuning and load it
-if args.use_tuning:
-    best_params_path = os.path.join(args.output_dir, f'best_params_{args.mode}.json')  # Separate for data/physics
-    if os.path.exists(best_params_path):
-        with open(best_params_path, 'r') as f:
-            best_params = json.load(f)
-            # Update the config with the best hyperparameters
-            config["training"]["learning_rate"] = best_params.get("learning_rate", config["training"]["learning_rate"])
-            config["training"]["batch_size"] = best_params.get("batch_size", config["training"]["batch_size"])
-            if args.mode == 'physics':
-                config["loss_parameters"]["physics_informed"]["lambda_data"] = best_params.get("lambda_data", config["loss_parameters"]["physics_informed"]["lambda_data"])
-                config["loss_parameters"]["physics_informed"]["lambda_continuity"] = best_params.get("lambda_continuity", config["loss_parameters"]["physics_informed"]["lambda_continuity"])
-                config["loss_parameters"]["physics_informed"]["lambda_vorticity_focused"] = best_params.get("lambda_vorticity_focused", config["loss_parameters"]["physics_informed"]["lambda_vorticity_focused"])
-                config["loss_parameters"]["physics_informed"]["lambda_momentum"] = best_params.get("lambda_momentum", config["loss_parameters"]["physics_informed"]["lambda_momentum"])
-                config["loss_parameters"]["physics_informed"]["lambda_gradient_penalty"] = best_params.get("lambda_gradient_penalty", config["loss_parameters"]["physics_informed"]["lambda_gradient_penalty"]) 
-    else:
-        print(f"No best_params_{args.mode}.json found. Using default config values.")
+# Set the seed for reproducibility (override config/tuning seed if specified)
+config_seed = config["training"].get("seed", None)
+seed = args.seed if args.seed else config_seed
+
+if seed:
+    print(f"Setting seed: {seed}")
+    np.random.seed(seed)
+    tf.random.set_seed(seed)
+else:
+    print("No seed specified. Results may vary.")
 
 # Create directories for output
 output_dir = args.output_dir
@@ -98,10 +123,9 @@ custom_objects = {
 
 # Define the tuning-compatible train function
 def train_tuning(config, arch_params=None, output_dir=None):
-    # Clear memory and session before starting training to avoid memory buildup
     K.clear_session()
     gc.collect()
-    
+
     # Strategy for distributed training across GPUs
     strategy = tf.distribute.MirroredStrategy()
 
@@ -109,15 +133,14 @@ def train_tuning(config, arch_params=None, output_dir=None):
         input_shape = tuple(config["model"]["input_shape"])
         model = unet_model(
             input_shape,
-            activation=arch_params.get("activation", "relu") if arch_params else "relu",
-            # Keep batch_norm and dropout fixed for tuning to avoid complexity
-            batch_norm=False,  
-            dropout_rate=0.0, 
+            activation=arch_params.get("activation", "relu"),
+            batch_norm=False,
+            dropout_rate=0.0,
             l2_reg=0.0,
-            attention=False  # Turn off attention to reduce memory usage
+            attention=False  # Turn off attention during tuning
         )
 
-        # Compile the model with the appropriate loss function based on the mode
+        # Compile the model
         if config["mode"] == 'data':
             model.compile(
                 loss=data_loss_fn,
@@ -144,20 +167,14 @@ def train_tuning(config, arch_params=None, output_dir=None):
             batch_size=config["training"]["batch_size"] * strategy.num_replicas_in_sync,
             callbacks=[early_stopping, checkpoint]
         )
-    
-    # Clear memory explicitly after training to avoid memory leakage
+
     K.clear_session()
     gc.collect()
 
-    # Get the best validation loss
-    val_loss = min(history.history['val_loss'])
-    
-    # Return only the numerical value of val_loss for compatibility with tuning frameworks
-    return float(val_loss)
+    return float(min(history.history['val_loss']))
 
 # Define the full-functionality train function
 def train_full(config, arch_params=None, output_dir=None):
-    # Strategy for distributed training across GPUs
     strategy = tf.distribute.MirroredStrategy()
 
     with strategy.scope():
@@ -171,7 +188,6 @@ def train_full(config, arch_params=None, output_dir=None):
             attention=arch_params.get("attention", False) if arch_params else False,
         )
 
-        # Compile the model with the appropriate loss function based on the mode
         if config["mode"] == 'data':
             model.compile(
                 loss=data_loss_fn,
@@ -188,7 +204,6 @@ def train_full(config, arch_params=None, output_dir=None):
         # Callbacks
         checkpoint_path = os.path.join(output_dir, f"lvad_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.h5")
         checkpoint = ModelCheckpoint(checkpoint_path, save_best_only=True, verbose=1, monitor='val_loss', mode='min')
-
         early_stopping = EarlyStopping(patience=10, restore_best_weights=True, monitor='val_loss', mode='min')
 
         # Train the model
@@ -200,33 +215,34 @@ def train_full(config, arch_params=None, output_dir=None):
             callbacks=[early_stopping, checkpoint]
         )
 
-
-    # Return the history object and validation loss for further processing
     return history, min(history.history['val_loss'])
 
 # Main function to handle either tuning or full mode
 if __name__ == '__main__':
-    start_time = time.time()    
+    start_time = time.time()
 
-    arch_params = None  # Placeholder for architecture parameters if needed
+    # Initialize arch_params as an empty dictionary if not using tuning
+    arch_params = None
 
     if args.use_tuning:
-        # Use tuning-compatible function
-        val_loss = train_tuning(config, arch_params, output_dir)
+        # Load the best architecture parameters from the tuning run
+        arch_params = config.get("model", {})  # Set to an empty dictionary if not present
+        print(f"Loaded architecture parameters: {arch_params}")
+
+    # Run training using the appropriate function
+    if args.use_tuning:
+        val_loss = train_tuning(config, arch_params or {}, output_dir)  # Ensure arch_params is not None
     else:
-        # Run the full functionality for single runs
-        history, val_loss = train_full(config, arch_params, output_dir)
-    
+        history, val_loss = train_full(config, arch_params or {}, output_dir)
+
     end_time = time.time()
     total_time = end_time - start_time
 
-    # Now plot the history and save metrics
-    plot_training_history(history, images_dir)
+    # Plot training history and save metrics
+    if not args.use_tuning:
+        plot_training_history(history, images_dir)
 
-    # Save hyperparameters
     save_hyperparameters(config, output_dir)
-
-    # Log runtime
-    log_runtime(history.epoch[-1] + 1, logs_dir)
+    log_runtime(history.epoch[-1] + 1 if not args.use_tuning else 0, logs_dir)
 
     print(f"Training complete. Total time: {total_time:.2f} seconds. Final validation loss: {val_loss}")
