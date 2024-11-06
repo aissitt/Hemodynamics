@@ -28,18 +28,18 @@ Hemodynamics/
 ├── training_outputs/                          
 │   ├── data
 │   │   ├── train_run_YYYYMMDD_HHMMSS/
-│   │   │   ├── lvad_model_YYYYMMDD_HHMMSS.h5  # Saved model file from the training run
-│   │   │   ├── hyperparameters.json           # Saved hyperparameters from the training run
+│   │   │   ├── lvad_model_YYYYMMDD_HHMMSS.h5      # Saved model file from the training run
+│   │   │   ├── hyperparameters.json               # Saved hyperparameters from the training run
 │   │   │   ├── logs/                     
-│   │   │   │   └── runtime.log           # Log file containing runtime information
+│   │   │   │   └── runtime.log                    # Log file containing runtime information
 │   │   │   ├── images/                   
-│   │   │   │   └── training_history.png  # Plot of training history
+│   │   │   │   └── training_history.png           # Plot of training history
 │   │   │   └── eval_run_YYYYMMDD_HHMMSS/ 
 │   │   │       ├── logs/                 
-│   │   │       │   └── metrics.json      # JSON file containing evaluation metrics for this evaluation run
+│   │   │       │   └── metrics.json               # JSON file containing evaluation metrics for this evaluation run
 │   │   │       ├── images/               
-│   │   │       │   ├── error_maps_peak_error.png  # Plot of error maps at peak error
-│   │   │       │   └──    velocity_components_comparison_xz.png # Plot of u, v, and w velocity components at selected slices along xz plane
+│   │   │       │   ├── error_maps_peak_error.png                            # Plot of error maps at peak error
+│   │   │       │   └──    velocity_components_comparison_xz.png             # Plot of u, v, and w velocity components at selected slices along xz plane
 │   │   │       └── ...                   
 │   │   └── ...
 │   └── physics
@@ -49,8 +49,8 @@ Hemodynamics/
 │   ├── data
 │   │   ├── tuning_run_YYYYMMDD_HHMMSS/
 │   │   │   ├── logs
-│   │   │   │   ├── best_config_data.json
-│   │   │   │   └──   └── best_params_data.json
+│   │   │   │   ├── best_config_data.json            # Save config with formatted best parameters from tuning
+│   │   │   │   └──   └── best_params_data.json      # Save file with best tuned parameters
 │   │   │   ├── trial 0
 │   │   │   │   └── lvad_model_YYYYMMDD_HHMMSS.h5  # Saved model file from single tuning trial / training run
 │   │   │   └── ...
@@ -59,7 +59,7 @@ Hemodynamics/
 │       └── Similar structure to tunining_outputs/data ...
 │
 ├── Aneurysm/
-|   ├── Similar structure ...
+|   └── Similar structure to Hemodynamics/LVAD ...
 |
 └── README.md                         # README file with project details and usage instructions
 ```
