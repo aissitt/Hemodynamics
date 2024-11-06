@@ -10,18 +10,20 @@ Hemodynamics/
 ├── LVAD/                             
 │   ├── config.json                   # Configuration file for training and evaluation
 │   ├── environment.yml               # Conda environment file for setting up dependencies
-|   ├── requirements.txt              # More dependencies
+│   ├── eval.py                       # Evaluation script
 │   ├── loss.py                       # Script containing custom loss functions
 │   ├── metrics.py                    # Script containing custom metrics
 │   ├── model.py                      # Script defining the model architecture (UNet)
+│   ├── requirements.txt              # More dependencies
 │   ├── train.py                      # Training script
-│   ├── eval.py                       # Evaluation script
+│   ├── tune.py                       # Tuning script
 │   ├── utils.py                      # Utility functions used across scripts
-│   └── slurm/                        
+│   └── slurm/
+│       ├── create_env.sh             # SLURM Script for creating the environment
+│       ├── env.sh                    # Script for launching the environment
+│       ├── eval_multigpu.sh          # SLURM script for launching evaluation jobs                   
 │       ├── train_multigpu.sh         # SLURM script for launching training jobs
-│       ├── eval_multigpu.sh          # SLURM script for launching evaluation jobs
-|       ├── create_env.sh             # SLURM Script for creating the environment
-│       └── env.sh                    # Script for setting up the environment
+│       └── tune.sh                   # SLURM script for launching tuning jobs
 │
 ├── outputs/                          
 │   ├── train_run_YYYYMMDD_HHMMSS/    
