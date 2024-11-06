@@ -43,7 +43,20 @@ Hemodynamics/
 │   │   │       └── ...                   
 │   │   └── ...
 │   └── physics
-│       ├── Similar structure to training_outputs/data ...                       
+│       └── Similar structure to training_outputs/data ...
+│                 
+├── tuning_outputs/
+│   ├── data
+│   │   ├── tuning_run_YYYYMMDD_HHMMSS/
+│   │   │   ├── logs
+│   │   │   │   ├── best_config_data.json
+│   │   │   │   └──   └── best_params_data.json
+│   │   │   ├── trial 0
+│   │   │   │   └── lvad_model_YYYYMMDD_HHMMSS.h5  # Saved model file from single tuning trial / training run
+│   │   │   └── ...
+│   │   └── ...
+│   └── physics
+│       └── Similar structure to tunining_outputs/data ...
 │
 ├── Aneurysm/
 |   ├── Similar structure ...
@@ -78,7 +91,7 @@ Hemodynamics/
 4. **Set Output Directory and Configure Environment Variables** (if using `use_env_vars` in `config.json`):
    Do this in the `train_multigpu.sh` and `eval_multigpu.sh` files:
    ```bash
-   OUTPUT_BASE_DIR=/path/to/your/Hemodynamics/LVAD/outputs
+   OUTPUT_BASE_DIR=/path/to/your/Hemodynamics/LVAD/training_outputs
    export INPUT_DATA_PATH=/path/to/input/data
    export OUTPUT_DATA_PATH=/path/to/output/data
    ```
