@@ -26,7 +26,7 @@ Hemodynamics/
 │       └── tune.sh                   # SLURM script for launching tuning jobs
 │
 ├── training_outputs/                          
-│   ├── data
+│   ├── data                                       # Data-driven models
 │   │   ├── train_run_YYYYMMDD_HHMMSS/
 │   │   │   ├── lvad_model_YYYYMMDD_HHMMSS.h5      # Saved model file from the training run
 │   │   │   ├── hyperparameters.json               # Saved hyperparameters from the training run
@@ -42,20 +42,20 @@ Hemodynamics/
 │   │   │       │   └──    velocity_components_comparison_xz.png             # Plot of u, v, and w velocity components at selected slices along xz plane
 │   │   │       └── ...                   
 │   │   └── ...
-│   └── physics
+│   └── physics                                    # Physics-informed models
 │       └── Similar structure to training_outputs/data ...
 │                 
 ├── tuning_outputs/
-│   ├── data
+│   ├── data                                         # Data-driven models
 │   │   ├── tuning_run_YYYYMMDD_HHMMSS/
 │   │   │   ├── logs
 │   │   │   │   ├── best_config_data.json            # Save config with formatted best parameters from tuning
 │   │   │   │   └──   └── best_params_data.json      # Save file with best tuned parameters
 │   │   │   ├── trial 0
-│   │   │   │   └── lvad_model_YYYYMMDD_HHMMSS.h5  # Saved model file from single tuning trial / training run
-│   │   │   └── ...
+│   │   │   │   └── lvad_model_YYYYMMDD_HHMMSS.h5    # Saved model file from single tuning trial / training run
+│   │   │   └── ... 
 │   │   └── ...
-│   └── physics
+│   └── physics                                      # Physics-informed models
 │       └── Similar structure to tunining_outputs/data ...
 │
 ├── Aneurysm/
