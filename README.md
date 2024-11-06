@@ -25,21 +25,25 @@ Hemodynamics/
 │       ├── train_multigpu.sh         # SLURM script for launching training jobs
 │       └── tune.sh                   # SLURM script for launching tuning jobs
 │
-├── outputs/                          
-│   ├── train_run_YYYYMMDD_HHMMSS/    
-│   │   ├── lvad_model_YYYYMMDD_HHMMSS.h5  # Saved model file from the training run
-│   │   ├── logs/                     
-│   │   │   ├── metrics.json          # JSON file containing evaluation metrics
-│   │   │   └── runtime.log           # Log file containing runtime information
-│   │   ├── images/                   
-│   │   │   └── training_history.png  # Plot of training history
-│   │   └── eval_run_YYYYMMDD_HHMMSS/ 
-│   │       ├── logs/                 
-│   │       │   └── metrics.json      # JSON file containing evaluation metrics for this evaluation run
-│   │       ├── images/               
-│   │       │   └── error_maps_peak_error.png  # Plot of error maps at peak error
-│   │       └── ...                   
-│   ├── ...                           
+├── training_outputs/                          
+│   ├── data
+│   │   ├── train_run_YYYYMMDD_HHMMSS/
+│   │   │   ├── lvad_model_YYYYMMDD_HHMMSS.h5  # Saved model file from the training run
+│   │   │   ├── hyperparameters.json           # Saved hyperparameters from the training run
+│   │   │   ├── logs/                     
+│   │   │   │   └── runtime.log           # Log file containing runtime information
+│   │   │   ├── images/                   
+│   │   │   │   └── training_history.png  # Plot of training history
+│   │   │   └── eval_run_YYYYMMDD_HHMMSS/ 
+│   │   │       ├── logs/                 
+│   │   │       │   └── metrics.json      # JSON file containing evaluation metrics for this evaluation run
+│   │   │       ├── images/               
+│   │   │       │   ├── error_maps_peak_error.png  # Plot of error maps at peak error
+│   │   │       │   └──    velocity_components_comparison_xz.png # Plot of u, v, and w velocity components at selected slices along xz plane
+│   │   │       └── ...                   
+│   │   └── ...
+│   └── physics
+│       ├── Similar structure to training_outputs/data ...                       
 │
 ├── Aneurysm/
 |   ├── Similar structure ...
