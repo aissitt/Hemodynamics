@@ -64,6 +64,68 @@ Hemodynamics/
 └── README.md                         # README file with project details and usage instructions
 ```
 
+## Configuration
+
+The `config.json` file contains all the configurations for training and evaluation:
+
+```json
+{
+    "use_env_vars": true,
+    "training": {
+        "epochs": 10000,
+        "batch_size": 1,
+        "learning_rate": 0.0002696649999627062,
+        "train_indices": [
+            0,
+            36
+        ],
+        "val_indices": [
+            36,
+            40
+        ],
+        "test_indices": [
+            40,
+            50
+        ],
+        "input_data": "$INPUT_DATA_PATH",
+        "output_data": "$OUTPUT_DATA_PATH",
+        "seed": 42
+    },
+    "loss_parameters": {
+        "data_driven": {
+            "huber_delta": 0.1
+        },
+        "physics_informed": {
+            "lambda_data": 1.0942454186121653,
+            "lambda_continuity": 0.03683764970538538,
+            "lambda_vorticity_focused": 0.8430359932524556,
+            "threshold_vorticity": 0.0437,
+            "lambda_momentum": 0.007511852300925318,
+            "lambda_gradient_penalty": 0.5265956340105086,
+            "lambda_sobel": 0.05,
+            "lambda_laplacian": 0.05,
+            "lambda_anisotropy": 0.1,
+            "nu": 3.5e-06,
+            "huber_delta": 0.3217620328175067
+        }
+    },
+    "model": {
+        "activation": "relu",
+        "batch_norm": false,
+        "dropout_rate": 0.0,
+        "l2_reg": 0.0,
+        "attention": false,
+        "input_shape": [
+            128,
+            128,
+            128,
+            2
+        ]
+    },
+    "mode": "physics"
+}
+```
+
 ## Setup Instructions (SLURM)
 
 ### Prerequisites
@@ -120,65 +182,12 @@ sbatch slurm/eval_multigpu.sh physics      # For physics-informed model
 
 By default, the evaluation script uses the most recent model saved in the corresponding `train_run` directory. You can specify a different model by modifying the `eval_multigpu.sh` script or passing the `--model-path` argument.
 
-## Configuration
+## Setup Instructions (Command Line)
 
-The `config.json` file contains all the configurations for training and evaluation:
 
-```json
-{
-    "use_env_vars": true,
-    "training": {
-        "epochs": 10000,
-        "batch_size": 1,
-        "learning_rate": 0.0002696649999627062,
-        "train_indices": [
-            0,
-            36
-        ],
-        "val_indices": [
-            36,
-            40
-        ],
-        "test_indices": [
-            40,
-            50
-        ],
-        "input_data": "$INPUT_DATA_PATH",
-        "output_data": "$OUTPUT_DATA_PATH",
-        "seed": 42
-    },
-    "loss_parameters": {
-        "data_driven": {
-            "huber_delta": 0.1
-        },
-        "physics_informed": {
-            "lambda_data": 1.0942454186121653,
-            "lambda_continuity": 0.03683764970538538,
-            "lambda_vorticity_focused": 0.8430359932524556,
-            "threshold_vorticity": 0.0437,
-            "lambda_momentum": 0.007511852300925318,
-            "lambda_gradient_penalty": 0.5265956340105086,
-            "nu": 3.5e-06,
-            "huber_delta": 0.3217620328175067
-        }
-    },
-    "model": {
-        "activation": "relu",
-        "batch_norm": false,
-        "dropout_rate": 0.0,
-        "l2_reg": 0.0,
-        "attention": false,
-        "input_shape": [
-            128,
-            128,
-            128,
-            2
-        ]
-    },
-    "mode": "physics"
-}
-```
 
+
+ 
 ## Loss Functions
 
 ### Data-Driven Loss (Huber Loss)
